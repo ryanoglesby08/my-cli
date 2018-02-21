@@ -2,7 +2,7 @@
 
 A CLI for me!
 
-```
-yarn
-
+```bash
+npm install <path/to/my-cli> -g
+my --help
 ```
