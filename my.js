@@ -6,17 +6,7 @@ const { resolve } = require('path');
 const program = require('commander');
 const emoji = require('node-emoji');
 
-const withIO = process => {
-  process.stdout.on('data', data => {
-    console.log(String(data));
-  });
-
-  process.stderr.on('data', data => {
-    console.error(String(data));
-  });
-
-  return process;
-};
+const e = emoji.get;
 
 program
   .command('highlight <syntax>')
@@ -35,14 +25,12 @@ program
       );
 
       console.log(
-        `${emoji.get(
-          'lower_left_crayon'
-        )}  Code highlighted and in your clipboard!`
+        `${e('lower_left_crayon')}  Code highlighted and in your clipboard!`
       );
       console.log(
-        `${emoji.get(
+        `${e(
           'point_right'
-        )} I recommend you copy code snippets out of Visual Studio Code for better highlighting though. ${emoji.get(
+        )} I recommend you copy code snippets out of Visual Studio Code for better highlighting though. ${e(
           'point_left'
         )}`
       );
@@ -60,11 +48,13 @@ program
 
 program
   .command('backup')
-  .description('backup important files to an external hard drive')
+  .description('Backup important files to an external hard drive')
   .action(() => {
-    exec('ls /Volumes | grep RhinoDrive', (error, stdout, stderr) => {
+    exec('ls /Volumes | grep RhinoDrive', (error, stdout) => {
       if (!stdout) {
-        console.error('Connect the external hard drive and try again.');
+        console.error(
+          `${e('minidisc')} Connect the external hard drive and try again.`
+        );
         return;
       }
 
@@ -75,8 +65,9 @@ program
       const dest = '/Volumes/RhinoDrive/Backup/';
 
       sources.forEach(source => {
-        const sync = withIO(
-          spawn('rsync', [
+        const sync = spawn(
+          'rsync',
+          [
             '--archive',
             '--verbose',
             '--delete',
@@ -84,14 +75,21 @@ program
             '--exclude-from=backup-excludes',
             source,
             dest,
-          ])
+          ],
+          {
+            stdio: 'inherit',
+          }
         );
 
         sync.on('close', code => {
           if (code === 0) {
-            console.log(`${source} copied to ${dest}`);
+            console.log(`${e('white_check_mark')} ${source} copied to ${dest}`);
           } else {
-            console.error(`Error: ${source} was not copied to ${dest}`);
+            console.error(
+              `${e(
+                'skull_and_crossbones'
+              )} Error: ${source} was not copied to ${dest}`
+            );
           }
 
           console.log(`rsync exited with code ${code}`);
