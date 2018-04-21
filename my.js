@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const { exec, execSync, spawn } = require('child_process');
+const { resolve } = require('path');
+
 const program = require('commander');
 const emoji = require('node-emoji');
 
@@ -49,17 +51,10 @@ program
 
 program
   .command('serve <dir>')
-  .description('serve the contents of a directory')
-  .option('-p, --port', 'port')
-  .action((directory, command) => {
-    const port = command.port || 8080;
-
-    const httpServer = withIO(
-      spawn('./node_modules/.bin/http-server', [directory, '-p', port])
-    );
-
-    httpServer.on('close', code => {
-      console.log(`HTTP server exited with code ${code}`);
+  .description('Serve the contents of a directory')
+  .action(directory => {
+    spawn(resolve(__dirname, 'node_modules/.bin/http-server'), [directory], {
+      stdio: 'inherit',
     });
   });
 
