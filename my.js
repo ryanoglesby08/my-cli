@@ -5,8 +5,11 @@ const { resolve } = require('path');
 
 const program = require('commander');
 const emoji = require('node-emoji');
+const csv = require('csvtojson');
 
 const e = emoji.get;
+
+// ***************** HIGHLIGHT *************************** //
 
 program
   .command('highlight <syntax>')
@@ -37,6 +40,8 @@ program
     });
   });
 
+// ********************** SERVE *************************** //
+
 program
   .command('serve <dir>')
   .description('Serve the contents of a directory')
@@ -45,6 +50,8 @@ program
       stdio: 'inherit',
     });
   });
+
+// ********************** BACKUP *************************** //
 
 program
   .command('backup')
@@ -96,6 +103,96 @@ program
         });
       });
     });
+  });
+
+// ********************** EXPENSES *************************** //
+
+const parseFile = filePath =>
+  new Promise(resolve => {
+    const expenses = [];
+
+    csv()
+      .fromFile(filePath)
+      .on('json', ({ Timestamp, Amount, Category }) => {
+        expenses.push({
+          timestamp: Timestamp,
+          amount: Number(Amount),
+          category: Category,
+        });
+      })
+      .on('done', error => {
+        resolve(expenses);
+      });
+  });
+
+const flatten = arr => [].concat.apply([], arr);
+
+const groupByMonth = expenses =>
+  expenses.reduce((months, expense) => {
+    const month = new Date(expense.timestamp).toLocaleDateString('en-US', {
+      month: 'long',
+    });
+
+    const monthsExpenses = months.hasOwnProperty(month)
+      ? months[month].concat(expense)
+      : [expense];
+
+    return Object.assign({}, months, { [month]: monthsExpenses });
+  }, {});
+
+const groups = {
+  Hotel: 'travel',
+  'Local Transportation': 'travel',
+  'Business Meals': 'food',
+  'Airfare & Upgrades': 'travel',
+};
+const getGroup = category => {
+  if (!groups.hasOwnProperty(category)) {
+    throw new Error(
+      `Unidentified expense category: ${category}. Add it to the \`groups\` mapping and try again.`
+    );
+  }
+
+  return groups[category];
+};
+
+const sumExpensesByGroup = expenses =>
+  expenses.reduce((groups, expense) => {
+    const group = getGroup(expense.category);
+
+    const total = groups.hasOwnProperty(group)
+      ? groups[group] + expense.amount
+      : expense.amount;
+
+    return Object.assign({}, groups, { [group]: total });
+  }, {});
+
+program
+  .command('expenses <files...>')
+  .description('Calculate expense amounts by category')
+  .action(files => {
+    Promise.all(files.map(parseFile))
+      .then(expensesList => {
+        const expenses = flatten(expensesList);
+
+        const expensesByMonth = groupByMonth(expenses);
+
+        const totalsByMonth = Object.keys(expensesByMonth).reduce(
+          (totalsByMonth, month) => {
+            const monthsExpenses = expensesByMonth[month];
+
+            const totalsByGroup = sumExpensesByGroup(monthsExpenses);
+
+            return Object.assign({}, totalsByMonth, { [month]: totalsByGroup });
+          },
+          {}
+        );
+
+        console.log(totalsByMonth);
+      })
+      .catch(error => {
+        console.error(error);
+      });
   });
 
 program.parse(process.argv);
