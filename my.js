@@ -145,11 +145,14 @@ const groups = {
   'Local Transportation': 'travel',
   'Business Meals': 'food',
   'Airfare & Upgrades': 'travel',
+  Telephone: 'bills',
+  'Benefits (Transit)': 'public transit',
+  Other: 'other',
 };
 const getGroup = category => {
   if (!groups.hasOwnProperty(category)) {
     throw new Error(
-      `Unidentified expense category: ${category}. Add it to the \`groups\` mapping and try again.`
+      `Unidentified expense category: "${category}". Add it to the \`groups\` mapping and try again.`
     );
   }
 
@@ -166,6 +169,9 @@ const sumExpensesByGroup = expenses =>
 
     return Object.assign({}, groups, { [group]: total });
   }, {});
+
+const sumAllExpenses = expenses =>
+  expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
 program
   .command('expenses <files...>')
@@ -188,7 +194,16 @@ program
           {}
         );
 
-        console.log(totalsByMonth);
+        console.log(JSON.stringify(totalsByMonth, null, 2));
+        console.log(
+          `\n${e('moneybag')} Total reimbursed: ${new Intl.NumberFormat(
+            'en-US',
+            {
+              style: 'currency',
+              currency: 'USD',
+            }
+          ).format(sumAllExpenses(expenses))}`
+        );
       })
       .catch(error => {
         console.error(error);
