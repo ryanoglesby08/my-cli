@@ -79,7 +79,7 @@ program
             '--verbose',
             '--delete',
             '--delete-excluded',
-            '--exclude-from=backup-excludes',
+            `--exclude-from=${resolve(__dirname, './backup-excludes')}`,
             source,
             dest,
           ],
@@ -95,7 +95,7 @@ program
             console.error(
               `${e(
                 'skull_and_crossbones'
-              )} Error: ${source} was not copied to ${dest}`
+              )}  Error: ${source} was not copied to ${dest}`
             );
           }
 
