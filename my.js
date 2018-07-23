@@ -149,6 +149,7 @@ const groups = {
   'Benefits (Transit)': 'public transit',
   Other: 'other',
   Conference: 'conference',
+  'Benefits (Fitness)': 'fitness'
 };
 const getGroup = category => {
   if (!groups.hasOwnProperty(category)) {
