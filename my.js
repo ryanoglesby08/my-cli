@@ -143,8 +143,9 @@ const groupByMonth = expenses =>
 const groups = {
   Hotel: 'travel',
   'Local Transportation': 'travel',
-  'Business Meals': 'food',
   'Airfare & Upgrades': 'travel',
+  'Car Rental': 'travel',
+  'Business Meals': 'food',
   Telephone: 'bills',
   'Benefits (Transit)': 'public transit',
   Other: 'other',
