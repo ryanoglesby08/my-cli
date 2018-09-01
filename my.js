@@ -145,6 +145,7 @@ const groups = {
   'Local Transportation': 'travel',
   'Airfare & Upgrades': 'travel',
   'Car Rental': 'travel',
+  'Gas': 'travel',
   'Business Meals': 'food',
   Telephone: 'bills',
   'Benefits (Transit)': 'public transit',
@@ -162,7 +163,7 @@ const getGroup = category => {
   return groups[category];
 };
 
-const sumExpensesByGroup = expenses =>
+const sumExpensesByGroup = expenses => 
   expenses.reduce((groups, expense) => {
     const group = getGroup(expense.category);
 
