@@ -151,7 +151,8 @@ const groups = {
   'Benefits (Transit)': 'public transit',
   Other: 'other',
   Conference: 'conference',
-  'Benefits (Fitness)': 'fitness'
+  'Benefits (Fitness)': 'fitness',
+  'Passport/Visa/Immigration': 'passport'
 };
 const getGroup = category => {
   if (!groups.hasOwnProperty(category)) {
@@ -163,7 +164,7 @@ const getGroup = category => {
   return groups[category];
 };
 
-const sumExpensesByGroup = expenses => 
+const sumExpensesByGroup = expenses =>
   expenses.reduce((groups, expense) => {
     const group = getGroup(expense.category);
 
